@@ -45,19 +45,29 @@ def registro_cliente_y_ruleta(request):
 
     return render(request, 'ruleta/registro_y_juego.html', {'form': form})
 
+import random
+
 def determinar_premio(premios):
-    # Crear una lista acumulativa de probabilidades
-    total_probabilidad = sum(premio.probabilidad for premio in premios)
+    # Probabilidad de no ganar ningún premio
+    probabilidad_no_ganar = 30  # Puedes ajustar este valor para aumentar/disminuir la probabilidad
+
+    # Crear una lista acumulativa de probabilidades, incluyendo la opción de no ganar
+    total_probabilidad = probabilidad_no_ganar + sum(premio.probabilidad for premio in premios)
     seleccion = random.uniform(0, total_probabilidad)
     acumulador = 0
 
-    # Recorrer los premios y determinar el premio seleccionado
+    # Primero, comprobar si la selección es dentro del rango de "No ganar"
+    acumulador += probabilidad_no_ganar
+    if seleccion <= acumulador:
+        return None  # No gana ningún premio
+
+    # Luego, recorrer los premios y determinar si alguno fue seleccionado
     for premio in premios:
         acumulador += premio.probabilidad
         if seleccion <= acumulador:
             return premio
 
-    return None
+    return None  # Retornar None si por alguna razón no se selecciona un premio
 
 def resultado(request, cliente_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
