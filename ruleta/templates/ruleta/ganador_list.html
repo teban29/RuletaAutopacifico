@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Lista de Ganadores</h2>
+  <a href="{% url 'ganador_create' %}" class="btn btn-primary mb-3">Agregar Ganador</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Premio</th>
+        <th>Fecha Ganado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ganador in ganadores %}
+        <tr>
+          <td>{{ ganador.cliente }}</td>
+          <td>{{ ganador.premio }}</td>
+          <td>{{ ganador.fecha_ganado }}</td>
+          <td>
+            <a href="{% url 'ganador_update' ganador.pk %}" class="btn btn-warning btn-sm">Editar</a>
+            <a href="{% url 'ganador_delete' ganador.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

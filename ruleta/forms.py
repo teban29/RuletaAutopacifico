@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente
+from .models import Cliente, Premio, Ganador
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -13,4 +13,22 @@ class ClienteForm(forms.ModelForm):
             'numero_factura': forms.TextInput(attrs={'class': 'form-control'}),
             }
         
-        
+class PremioForm(forms.ModelForm):
+    class Meta:
+        model = Premio
+        fields = ['nombre', 'descripcion', 'probabilidad']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control'}),
+            'probabilidad': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+class GanadorForm(forms.ModelForm):
+    class Meta:
+        model = Ganador
+        fields = ['cliente', 'premio']
+        widgets = {
+            'cliente': forms.Select(attrs={'class': 'form-control'}),
+            'premio': forms.Select(attrs={'class': 'form-control'}),
+            }
+

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado del Tiro en la Ruleta</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Resultado del Tiro en la Ruleta</h2>
+        <p>¡Gracias por participar, {{ cliente.nombre }}!</p>
+
+        {% if premio_ganado %}
+            <div class="alert alert-success">
+                <strong>¡Felicidades!</strong> Has ganado el premio: <strong>{{ premio_ganado.nombre }}</strong>.
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Lo sentimos, no has ganado ningún premio esta vez. ¡Intenta de nuevo más tarde!
+            </div>
+        {% endif %}
+
+        <a href="{% url 'registro_cliente_y_ruleta' %}" class="btn btn-primary mt-3">Jugar de Nuevo</a>
+    </div>
+</body>
+</html>
