@@ -27,9 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_URL = '/accounts/login/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/ruleta/admin-main/'
+LOGIN_URL = 'login'  # Nombre de la vista de login
+LOGIN_REDIRECT_URL = 'admin_main'  # Redirige a la página principal del administrador luego del login
+LOGOUT_REDIRECT_URL = 'login'
 
 
 

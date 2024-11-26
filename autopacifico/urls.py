@@ -20,10 +20,9 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ruleta/', include('ruleta.urls')),  # Incluye las URLs de la aplicación ruleta
-    
-    # URLs de autenticación
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),  # Página principal al login
+    path('ruleta/', include('ruleta.urls')),  # Incluye las rutas de la aplicación `ruleta`
+    path('accounts/', include('django.contrib.auth.urls')),  # Añade rutas para login/logout
 ]
+
 

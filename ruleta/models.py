@@ -16,6 +16,7 @@ class Premio(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     probabilidad = models.FloatField()
+    activo = models.BooleanField(default=True)
     
     def __str__(self):
         return f"{self.nombre}"
@@ -27,6 +28,8 @@ class Ruleta(models.Model):
     
     def __str__(self):
         return f"Tiro lanzado por {self.cliente.nombre} el {self.fecha_tiro}"
+    
+    
     
 class Ganador(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)

@@ -18,6 +18,14 @@ class AdminRequiredMixin(UserPassesTestMixin):
 def admin_main_page(request):
     return render(request, 'ruleta/admin_main_page.html')
 
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def premio_toggle(request, pk):
+    premio = get_object_or_404(Premio, pk=pk)
+    premio.activo = not premio.activo  # Cambiar el estado de activo/inactivo
+    premio.save()
+    return redirect('premio_list')
+
 def registro_cliente_y_ruleta(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
