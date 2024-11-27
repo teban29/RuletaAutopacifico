@@ -18,7 +18,7 @@
         <tr>
           <td>{{ premio.nombre }}</td>
           <td>{{ premio.descripcion }}</td>
-          <td>{{ premio.probabilidad }}</td>
+          <td>{{ premio.probabilidad|floatformat:2 }}%</td>
           <td>
             <!-- Interruptor de activación/desactivación -->
             <label class="switch">
@@ -34,6 +34,18 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <div class="alert alert-info" role="alert">
+    La probabilidad de no ganar nada es {{ probabilidad_actual }}%.
+  </div>
+  <form method="post" action="{% url 'actualizar_probabilidad' %}" class="mb-3">
+    {% csrf_token %}
+    <label for="probabilidad_no_ganar">Ajusta la probabilidad de no ganar</label>
+    <input type="number" class="form-control mb-2" id="probabilidad_no_ganar" name="probabilidad_no_ganar" step="0.01" value="{{ probabilidad_actual }}">
+    
+    <button type="submit" class="btn btn-info">Cambiar Configuración</button>
+  </form>
+
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {

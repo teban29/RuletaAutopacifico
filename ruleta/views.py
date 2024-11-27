@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .models import Cliente, Premio, Ruleta, Ganador
+from .models import Cliente, Premio, Ruleta, Ganador, Configuracion
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .forms import ClienteForm, PremioForm, GanadorForm
+from .forms import ClienteForm, PremioForm, GanadorForm, ConfiguracionForm
 import random
 
 class AdminRequiredMixin(UserPassesTestMixin):
@@ -56,26 +56,40 @@ def registro_cliente_y_ruleta(request):
 import random
 
 def determinar_premio(premios):
-    # Probabilidad de no ganar ningún premio
-    probabilidad_no_ganar = 30  # Puedes ajustar este valor para aumentar/disminuir la probabilidad
+    try:
+        config = Configuracion.objects.latest('id')
+        probabilidad_no_ganar = config.probabilidad_no_ganar
+    except Configuracion.DoesNotExist:
+        probabilidad_no_ganar = 30  # Usa un valor por defecto si no se ha configurado
 
-    # Crear una lista acumulativa de probabilidades, incluyendo la opción de no ganar
     total_probabilidad = probabilidad_no_ganar + sum(premio.probabilidad for premio in premios)
     seleccion = random.uniform(0, total_probabilidad)
     acumulador = 0
-
-    # Primero, comprobar si la selección es dentro del rango de "No ganar"
     acumulador += probabilidad_no_ganar
     if seleccion <= acumulador:
         return None  # No gana ningún premio
 
-    # Luego, recorrer los premios y determinar si alguno fue seleccionado
     for premio in premios:
         acumulador += premio.probabilidad
         if seleccion <= acumulador:
             return premio
 
-    return None  # Retornar None si por alguna razón no se selecciona un premio
+    return None
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def actualizar_probabilidad(request):
+    if request.method == 'POST':
+        nueva_probabilidad = request.POST.get('probabilidad_no_ganar')
+        if nueva_probabilidad:
+            Configuracion.objects.update_or_create(
+                id=1,  # Asumiendo que siempre trabajamos con un registro
+                defaults={'probabilidad_no_ganar': float(nueva_probabilidad)}
+            )
+        return redirect('premio_list')
+
+    probabilidad_actual = Configuracion.objects.first().probabilidad_no_ganar if Configuracion.objects.exists() else 30
+    return render(request, 'ruleta/premio_list.html', {'probabilidad_actual': probabilidad_actual})
+
 
 def resultado(request, cliente_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
@@ -93,6 +107,12 @@ class PremioListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     model = Premio
     template_name = 'ruleta/premios_list.html'
     context_object_name = 'premios'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Obtener la última configuración de probabilidad y pasarla al contexto
+        context['probabilidad_actual'] = Configuracion.objects.first().probabilidad_no_ganar if Configuracion.objects.exists() else 30
+        return context
 
 class PremioCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Premio

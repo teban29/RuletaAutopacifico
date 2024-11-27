@@ -1,5 +1,5 @@
 from django import forms
-from .models import Cliente, Premio, Ganador
+from .models import Cliente, Premio, Ganador, Configuracion
 
 class ClienteForm(forms.ModelForm):
     class Meta:
@@ -31,4 +31,11 @@ class GanadorForm(forms.ModelForm):
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'premio': forms.Select(attrs={'class': 'form-control'}),
             }
+class ConfiguracionForm(forms.ModelForm):
+    class Meta:
+        model = Configuracion
+        fields = ['probabilidad_no_ganar']
+        widgets = {
+            'probabilidad_no_ganar': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
 

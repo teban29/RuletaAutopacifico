@@ -38,3 +38,9 @@ class Ganador(models.Model):
     
     def __str__(self):
         return f"{self.cliente.nombre} ganó el premio {self.premio.nombre} el {self.fecha_ganador}"
+    
+class Configuracion(models.Model):
+    probabilidad_no_ganar = models.FloatField(default=30)  # Valor por defecto del 30%
+
+    def __str__(self):
+        return f"Probabilidad de no ganar: {self.probabilidad_no_ganar}%"

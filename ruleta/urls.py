@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     # Hacer que la página de login sea la principal
     path('', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('actualizar-probabilidad/', views.actualizar_probabilidad, name='actualizar_probabilidad'),
 
     # URLs para registro de cliente y resultado
     path('jugar/', views.registro_cliente_y_ruleta, name='registro_cliente_y_ruleta'),
