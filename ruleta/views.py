@@ -42,10 +42,42 @@ def registro_cliente(request):
 def jugar_ruleta(request, cliente_id=None):
     if cliente_id is None:
         messages.error(request, 'Por favor, regístrate para jugar')
-        return redirect('registro_cliente')  # Redirigir al registro si no hay cliente_id
+        return redirect('registro_cliente')
     cliente = get_object_or_404(Cliente, pk=cliente_id)
-    premios = Premio.objects.filter(activo=True)
-    return render(request, 'ruleta/jugar_ruleta.html', {'cliente': cliente, 'premios': premios})
+    premios_activos = Premio.objects.filter(activo=True)
+    total_premios = premios_activos.count()
+    segment_angle = 360 / total_premios if total_premios > 0 else 0
+
+    # Calcular la probabilidad acumulada de cada premio
+    total_probabilidad = sum(premio.probabilidad for premio in premios_activos)
+    random_pick = random.uniform(0, total_probabilidad)
+    acumulado = 0
+    premio_ganado = None
+    ganador_index = 0  # Índice del premio ganado
+
+    for index, premio in enumerate(premios_activos):
+        acumulado += premio.probabilidad
+        if random_pick <= acumulado:
+            premio_ganado = premio
+            ganador_index = index
+            break
+
+    # Calcular el ángulo final para que coincida con el premio
+    grados_por_premio = 360 / total_premios
+    degrees_offset = 360 - (ganador_index * grados_por_premio)  # Ajuste para que el premio esté bajo la flecha
+
+    # Guardar el premio ganado en la base de datos si no es "Gracias por participar"
+    if premio_ganado and premio_ganado.nombre != "Gracias por participar":
+        Ganador.objects.create(cliente=cliente, premio=premio_ganado, fecha_ganador=timezone.now())
+
+    context = {
+        'cliente': cliente,
+        'premios': premios_activos,
+        'degrees_offset': degrees_offset,
+        'segment_angle': segment_angle
+    }
+    return render(request, 'ruleta/jugar_ruleta.html', context)
+
 
 @login_required
 def girar_ruleta(request, cliente_id):
