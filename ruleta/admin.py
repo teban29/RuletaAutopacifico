@@ -9,7 +9,7 @@ class ClienteAdmin(admin.ModelAdmin):
 
 @admin.register(Premio)
 class PremioAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'descripcion', 'probabilidad')
+    list_display = ('nombre', 'descripcion', 'probabilidad', 'color', 'activo')
     search_fields = ('nombre',)
     list_filter = ('probabilidad',)
 

@@ -17,6 +17,7 @@ class Premio(models.Model):
     descripcion = models.TextField()
     probabilidad = models.FloatField()
     activo = models.BooleanField(default=True)
+    color = models.CharField(max_length=7, default="#ffffff")
     
     def __str__(self):
         return f"{self.nombre}"

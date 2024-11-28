@@ -8,8 +8,12 @@ urlpatterns = [
     path('actualizar-probabilidad/', views.actualizar_probabilidad, name='actualizar_probabilidad'),
 
     # URLs para registro de cliente y resultado
-    path('jugar/', views.registro_cliente_y_ruleta, name='registro_cliente_y_ruleta'),
+    path('registro/', views.registro_cliente, name='registro_cliente_y_ruleta'),
+    path('jugar/', views.jugar_ruleta, name='jugar_ruleta'),  # Permite acceder sin cliente_id
+    path('jugar/<int:cliente_id>/', views.jugar_ruleta, name='jugar_ruleta'),
     path('resultado/<int:cliente_id>/', views.resultado, name='resultado'),
+    path('girar/', views.girar_ruleta, name='ruta_para_girar_ruleta'),
+
     
     # URLs para Clientes
     path('clientes/', views.ClienteListView.as_view(), name='cliente_list'),

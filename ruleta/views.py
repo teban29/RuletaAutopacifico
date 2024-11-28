@@ -6,6 +6,8 @@ from .models import Cliente, Premio, Ruleta, Ganador, Configuracion
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .forms import ClienteForm, PremioForm, GanadorForm, ConfiguracionForm
+from django.contrib import messages
+from django.http import JsonResponse
 import random
 
 class AdminRequiredMixin(UserPassesTestMixin):
@@ -26,34 +28,45 @@ def premio_toggle(request, pk):
     premio.save()
     return redirect('premio_list')
 
-def registro_cliente_y_ruleta(request):
+def registro_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
             cliente = form.save()
-
-            # Obtener todos los premios
-            premios = Premio.objects.all()
-
-            # Determinar el premio ganado en función de la probabilidad
-            premio_ganado = determinar_premio(premios)
-
-            # Crear el registro de la ruleta
-            ruleta = Ruleta(cliente=cliente, premio=premio_ganado)
-            ruleta.save()
-
-            # Si ganó un premio, registrarlo en Ganador
-            if premio_ganado:
-                Ganador.objects.create(cliente=cliente, premio=premio_ganado)
-
-            return redirect('resultado', cliente_id=cliente.id)
-
+            return redirect('jugar_ruleta', cliente_id=cliente.id)  # Redirigir a la vista de juego
     else:
         form = ClienteForm()
+    return render(request, 'ruleta/registro_cliente.html', {'form': form})
 
-    return render(request, 'ruleta/registro_y_juego.html', {'form': form})
+@login_required(login_url='/ruleta/registro/')
+def jugar_ruleta(request, cliente_id=None):
+    if cliente_id is None:
+        messages.error(request, 'Por favor, regístrate para jugar')
+        return redirect('registro_cliente')  # Redirigir al registro si no hay cliente_id
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+    premios = Premio.objects.filter(activo=True)
+    return render(request, 'ruleta/jugar_ruleta.html', {'cliente': cliente, 'premios': premios})
 
-import random
+@login_required
+def girar_ruleta(request, cliente_id):
+    if request.method == 'POST':
+        cliente = get_object_or_404(Cliente, pk=cliente_id)
+        premios = Premio.objects.filter(activo=True)
+        premio_ganado = determinar_premio(premios)
+
+        # Crear o actualizar un registro de Ruleta con el resultado
+        ruleta, created = Ruleta.objects.update_or_create(
+            cliente=cliente,
+            defaults={'premio': premio_ganado, 'fecha_tiro': timezone.now()}
+        )
+
+        # Opcionalmente guardar el ganador si ganó algo
+        if premio_ganado:
+            Ganador.objects.create(cliente=cliente, premio=premio_ganado, fecha_ganador=timezone.now())
+
+        return JsonResponse({'success': True, 'premio': str(premio_ganado.nombre) if premio_ganado else 'Ninguno'})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
 
 def determinar_premio(premios):
     try:
